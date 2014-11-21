@@ -44,8 +44,8 @@ class MarkupSocialShareButtons extends WireData implements Module {
         return array(
             'title' => 'Social Share Buttons',
             'version' => 2,
-            'summary' => '',
-            'href' => '',
+            'summary' => 'Generates social share button links',
+            'href' => 'https://processwire.com/talk/topic/8353-markupsocialsharebuttons/',
             'author' => 'Soma',
             'singular' => true,
             'autoload' => false,
