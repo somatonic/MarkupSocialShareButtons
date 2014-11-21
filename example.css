@@ -1,0 +1,32 @@
+
+/**
+ * MarkupSocialShareButtons exmaple CSS
+ */
+
+.MarkupSocialShareButtons{
+    list-style-type: none;
+}
+.MarkupSocialShareButtons li{
+    list-style-type: none;
+    float: left;
+    margin: 0 2px;
+}
+.MarkupSocialShareButtons li a{
+    display: inline-block;
+    text-decoration: none;
+}
+
+
+
+/**
+ * svg icons cutsom size and color example
+ */
+
+.MarkupSocialShareButtons [class*='share-icon'] {
+    width: 50px!important;
+    height: 50px!important;
+}
+
+.MarkupSocialShareButtons [class*='share-icon']:hover .outer-shape {
+    fill: #fc5800!important;
+}

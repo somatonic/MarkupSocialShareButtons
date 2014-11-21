@@ -1,0 +1,294 @@
+<?php
+
+/**
+ *  Markup Social Share Buttons
+ *
+ *  Helper markup module for creating social share buttons on a page. It generates
+ *  a simple UL list with the corrent share links for various social media platforms
+ *  that support link button. Maybe not your needed list but you can turn them on/off and
+ *  put them in order using the options "show".
+ *
+ *
+ * @author  Philipp Urlich <philipp@urlich.ch>
+ *
+ * ProcessWire 2.x
+ * Copyright (C) 2010 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ *
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ */
+
+
+/**
+ *
+ * Reference:
+ *
+ * https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fsitepoint.com%2F
+ * https://plus.google.com/share?url=http%3A%2F%2Fsitepoint.com%2F
+ * https://twitter.com/intent/tweet?url=http%3A%2F%2Fsitepoint.com%2F&text=SitePoint&hashtags=web,development
+ * http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Fsitepoint.com%2F&title=SitePoint
+ */
+
+
+
+class MarkupSocialShareButtons extends WireData implements Module {
+
+    /**
+     * getModuleInfo is a method required by all modules to tell ProcessWire about them
+     * @return array
+     */
+    public static function getModuleInfo() {
+
+        return array(
+            'title' => 'Social Share Buttons',
+            'version' => 2,
+            'summary' => '',
+            'href' => '',
+            'author' => 'Soma',
+            'singular' => true,
+            'autoload' => false,
+            );
+    }
+
+    protected $shareLinks = array(
+
+        /* Params
+            u           : the page URL
+         */
+        "email"             => "mailto:",
+
+        /* Params
+            u           : the page URL
+         */
+        "facebook"          => "https://www.facebook.com/sharer/sharer.php",
+
+        /*
+            url         : the page URL
+         */
+        "googleplus"        => "https://plus.google.com/share",
+
+        /*
+            url         : the page URL
+            text        : optional text
+            hashtags    : a comma-delimited set of hashtags
+         */
+        "twitter"           => "https://twitter.com/intent/tweet",
+
+        /*
+            mini        : must be set to ‘true’
+            url         : the page URL
+            source      : the company/named source (200 characters maximum)
+            title       : article title (200 characters maximum)
+            summary     : a short description (256 characters maximum)
+         */
+        "linkedin"          => "http://www.linkedin.com/shareArticle",
+    );
+
+    protected $socialIcons = array(
+        'email'        => '<i class="icon-email">e-mail</i>',
+        'googleplus'   => '<i class="icon-googleplus">google+</i>',
+        'facebook'     => '<i class="icon-facebook">facebook</i>',
+        'twitter'      => '<i class="icon-twitter">twitter</i>',
+        'linkedin'     => '<i class="icon-linkedin">linkedin</i>',
+    );
+
+    static protected $options = array(
+        "show" => "email,facebook,googleplus,twitter,linkedin",
+        "title" => "",
+        "text" => "",
+        "url" => "",
+        "tags" => "",
+    );
+
+    public function __construct(){
+
+    }
+
+    /**
+     * Initialize the module
+     *
+     * ProcessWire calls this when the module is loaded. For 'autoload' modules, this will be called
+     * when ProcessWire's API is ready. As a result, this is a good place to attach hooks.
+     *
+     */
+    public function init() {
+
+    }
+
+    public function setTheme($name) {
+
+        if(!$name) return $this;
+
+        if(is_array($name) && count($name)){
+            $this->socialIcons = array_merge($this->socialIcons, $name);
+            return $this;
+        }
+
+        $themeFilename = $this->config->paths->templates . "/" . $name . ".php";
+        if(file_exists($themeFilename)) {
+            include($themeFilename);
+            if(isset($socialIcons) && is_array($socialIcons)) {
+                $this->socialIcons = array_merge($this->socialIcons, $socialIcons);
+            }
+            return $this;
+        }
+
+        $themeFilename = $this->config->paths->{$this->className} . "/theme/" . $name . ".php";
+        if(file_exists($themeFilename)) {
+            include($themeFilename);
+            if(isset($socialIcons) && is_array($socialIcons)) {
+                $this->socialIcons = array_merge($this->socialIcons, $socialIcons);
+            }
+            return $this;
+        }
+
+        return $this;
+
+    }
+
+
+    /**
+     * when API and page to render is fully ready
+     */
+    public function ready() {
+
+
+    }
+
+
+    public function render( array $options = array() ) {
+
+        $out = '';
+
+        $options = array_merge(self::$options, $options);
+
+        $url = $this->getPageUrl($options['url']);
+        if(!$url) return "-- NOTICE Social Share Buttons: No URL supplied! --";
+
+        $title = $this->getPageTitle($options['title']);
+        if(!$title) return "-- NOTICE Social Share Buttons: No title supplied! --";
+
+        $text = $this->getPageText($options['text']);
+        if(!$text) return "-- NOTICE Social Share Buttons: No text supplied! --";
+
+        $tags = $options['tags'];
+
+        $url = $this->encodeUrl($url);
+
+        $items = explode(",",str_replace(" ", "", $options["show"]));
+
+        foreach($items as $item){
+            if(isset($this->shareLinks[$item]) && isset($this->socialIcons[$item])){
+                $sharerUrl = $this->shareLinks[$item];
+                $icon = $this->socialIcons[$item];
+                $popup = " popup";
+                $target = " target='_blank'";
+                if($item == "email") {
+                    $popup = "";
+                    $target = "";
+                    $params = "?subject={$title}&body={$url}";
+                }
+                if($item == "facebook") {
+                    $params = "?u={$url}";
+                }
+                if($item == "googleplus") {
+                    $params = "?url={$url}";
+                }
+                if($item == "twitter") {
+                    $params = "?url={$url}&text={$text}&hashtags={$tags}";
+                }
+                if($item == "linkedin") {
+                    $params = "?mini=true&url={$url}&title={$title}&summary={$text}";
+                }
+
+                $out .= "<li class='item $item$popup'>
+                            <a$target href='{$sharerUrl}{$params}'>$icon</a>
+                        </li>";
+            }
+        }
+
+        return "<ul class='MarkupSocialShareButtons cf'>$out</ul>";
+    }
+
+
+    public function ___getPageUrl($url) {
+
+        $url = $this->sanitizer->url($url);
+
+        // veryfiy internal urls, and if found return full http url
+        $relative = (strpos($url, "/") === 0) ? true : false;
+
+        if($url && $relative) {
+            $page = wire("pages")->get($url);
+            if($page->id && $page->viewable()) {
+                return $page->httpUrl;
+            }
+        }
+
+        // external url?
+        // TODO: not sure if we should allow absolute urls
+        if($url && strpos($url, "http") == 0) {
+            return $url;
+        }
+
+        // if no internal page found and not a full http url
+        // return currently viewed page
+        if(wire("page")->viewable()) {
+            return wire("page")->httpUrl;
+        }
+
+        return false;
+
+    }
+
+
+    public function ___getPageTitle($title) {
+
+        if(strlen(trim($title)) == 0){
+            $title = wire("page")->title;
+        }
+        return $this->wordLimiter($title, 100, "…");
+
+    }
+
+    public function ___getPageText($text) {
+
+        if(!$text) {
+            if(wire("page")->get("leadtext|summary|body")) {
+                $text = wire("page")->get("leadtext|summary|body");
+            }
+        }
+
+        return $this->wordLimiter($text, 100, "…");
+
+    }
+
+    public function ___encodeURL($url) {
+        return urlencode($url);
+    }
+
+
+    /**
+     * Limit words
+     */
+    public function wordLimiter($str = '', $limit = 120, $endstr = '...') {
+
+        $str = strip_tags($str);
+
+        if($str == '') return '';
+        if(strlen($str) <= $limit) return $str;
+
+        $out = substr($str, 0, $limit);
+        $pos = strrpos($out, " ");
+        if ($pos > 0) {
+            $out = substr($out, 0, $pos);
+        }
+        $out .= $endstr;
+        return $out;
+
+    }
+
+
+}
