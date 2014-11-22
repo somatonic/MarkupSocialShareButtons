@@ -122,7 +122,9 @@ Would only show the email, twitter and facebook links in the order specified.
 
 There comes several premade PNG icon themes with the module, but you can add your own themes easily.
 
-If you want to create one. Copy the /theme/default.php somewhere to your /site/ folder
+Important: If you choose a bundled theme, you have to include the theme.css to your site. Also if you want to handle the links in a popup, you can take the bundled example script ```example-jquery-popop.js``` and add it to your site.
+
+If you want to create custom one. Copy one like the ```/themes/black/``` somewhere to your ```/site/``` folder
 and modify it to your needs. You can then use the path and foldername of the theme in the options.
 
 ```
@@ -152,7 +154,7 @@ You may use wire("config")->urls or $this->config->urls->root etc to have custom
 
 # Assets JS and CSS
 
-Along with the module comes a example jQuery script ```example-jquery-popup.js``` you can add to your script to handle the popups.
+Along with the module comes an example jQuery script ```example-jquery-popup.js``` you can add to your script to handle the popups.
 
 
 
