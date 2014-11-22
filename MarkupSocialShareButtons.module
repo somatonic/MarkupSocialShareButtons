@@ -200,8 +200,8 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
         }
 
         // so far no theme file so try from within module directory /theme/ folder
-        $themeUrl = $this->config->urls->{$this->className} . "/" . self::THEMEPATH_LOCAL . "/" . $name . "/";
-        $themePath = $this->config->paths->{$this->className} . "/" . self::THEMEPATH_LOCAL . "/" . $name . "/";
+        $themeUrl = $this->config->urls->{$this->className} . self::THEMEPATH_LOCAL . "/" . $name . "/";
+        $themePath = $this->config->paths->{$this->className} . self::THEMEPATH_LOCAL . "/" . $name . "/";
         $themeFilename = $themePath . "theme.php";
         if(file_exists($themeFilename)) {
             include($themeFilename);
