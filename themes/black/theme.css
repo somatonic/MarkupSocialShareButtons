@@ -1,0 +1,32 @@
+
+/**
+ * MarkupSocialShareButtons default theme example CSS
+ * Use this theme as a start to create your own and copy it to your CSS and edit
+ */
+
+.MarkupSocialShareButtons{
+    list-style-type: none;
+    padding: 0;
+}
+.MarkupSocialShareButtons li{
+    list-style-type: none;
+    float: left;
+    margin: 0 2px;
+}
+.MarkupSocialShareButtons li a{
+    display: inline-block;
+    text-decoration: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    opacity: 0.8;
+}
+.MarkupSocialShareButtons li a:hover{
+    opacity: 1;
+}
+
+.MarkupSocialShareButtons img{
+    width: 100%;
+    height: auto;
+}
+
