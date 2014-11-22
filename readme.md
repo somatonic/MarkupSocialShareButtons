@@ -154,6 +154,8 @@ You may use wire("config")->urls or $this->config->urls->root etc to have custom
 
 # Assets JS and CSS
 
+If you choose one of the premade bundled themes, you'd have to copy the proper theme.css to your site CSS manually.
+
 Along with the module comes an example jQuery script ```example-jquery-popup.js``` you can add to your script to handle the popups.
 
 
