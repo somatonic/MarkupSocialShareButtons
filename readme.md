@@ -158,5 +158,5 @@ If you choose one of the premade bundled themes, you'd have to copy the proper t
 
 Along with the module comes an example jQuery script ```example-jquery-popup.js``` you can add to your script to handle the popups.
 
-
+[config screen](https://raw.githubusercontent.com/somatonic/MarkupSocialShareButtons/master/module-config-screen.png)
 
