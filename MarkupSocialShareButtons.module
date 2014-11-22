@@ -168,16 +168,13 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
      * It will try to load the them file containing the markup for the icons
      * used inside <a>'s
      *
-     * A custom theme file must be located somewhere inside /site/templates/
-     * Create a folder for example "socialbuttontheme" and a "mytheme.php".
-     * /site/templates/socialbuttontheme/mytheme.php
+     * A custom theme file must be located somewhere inside /site/
+     * Create a folder for example "/site/templates/socialbuttontheme/mytheme/" and in there a "theme.php".
+     * /site/templates/socialbuttontheme/mytheme/theme.php
      *
      * Now you can have the module use it by giving it the path relative from the templates folder
      *
-     * setTheme("socialbuttontheme/mytheme");
-     *
-     * To use theme that are inside this modules folder, simply use the name of the file (without the extension)
-     * setTheme("round");
+     * $options = array("theme" => "templates/socialbuttontheme/mytheme");
      *
      * @param module $this The module instance as it allows for chaining method calls
      */
