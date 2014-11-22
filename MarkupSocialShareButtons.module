@@ -482,7 +482,7 @@ _MARKUP;
         foreach(self::$services as $service) $f->addOption($service, $service);
         $f->attr("value", $data['show']);
         $f->label = "What buttons to show (default)";
-        $f->description = "Comma separated list of social sevices. Will be output in the same order . ie: 'facebook, googleplus, twitter, linkedin, email' .";
+        $f->description = "Choose from the list and sort them as you wish. You can also set as option via API as an array of the social sevices. Will be output in the same order specified.";
         $inputfields->add($f);
 
 
