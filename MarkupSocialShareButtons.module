@@ -46,7 +46,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
         return array(
             'title' => 'Social Share Buttons',
-            'version' => 100,
+            'version' => 101,
             'summary' => '',
             'href' => '',
             'author' => 'Soma',
