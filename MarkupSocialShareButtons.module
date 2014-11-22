@@ -128,7 +128,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
             summary     : a short description (256 characters maximum)
          */
         "linkedin_url"          => "http://www.linkedin.com/shareArticle",
-        "linkedin_params"       => "?mini=true&url={url}&title={title}&summary={text}",
+        "linkedin_params"       => "?mini=true&url={url}&title={title}&summary={text}&source={source}",
         "linkedin_icon"         => "<i>linkedin</i>",
 
     );
@@ -241,6 +241,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
         $data['{title}'] = $this->getPageTitle($this->options['title']);
         $data['{text}'] = $this->getPageText($this->options['text']);
         $data['{tags}'] = $this->options['tags'];
+        $data['{source}'] = $this->options['source'];
 
         // $items = explode(",",str_replace(" ", "", $this->options["show"]));
         $items = $this->options["show"];
@@ -504,7 +505,7 @@ _MARKUP;
             $f->attr("value", $data[$service . '_params']);
             $f->label = $service . " parameters";
             $f->description = "Can be any of the allowed $service params.";
-            $f->notes = "Use placeholders for the available values like: {url} {title} {text} {tags}";
+            $f->notes = "Use placeholders for the available values like: {url} {title} {text} {tags} {source}";
             $inputfields->add($f);
 
             $f = wire("modules")->InputfieldTextarea;
