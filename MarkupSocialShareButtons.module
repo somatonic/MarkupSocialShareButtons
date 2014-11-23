@@ -46,7 +46,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
         return array(
             'title' => 'Social Share Buttons',
-            'version' => 101,
+            'version' => 102,
             'summary' => '',
             'href' => '',
             'author' => 'Soma',
@@ -58,33 +58,48 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
     const THEMEPATH_LOCAL = "themes";
 
-    static protected $services = array(
+    protected $themeUrl;
+
+    protected $services = array(
             "email",
             "facebook",
             "googleplus",
             "twitter",
             "linkedin",
+            "tumblr",
+            "reddit",
+            "pinterest",
         );
 
     /**
      * Social share base urls
      */
-    static protected $defaults = array(
+    protected $defaults = array(
 
         "show" => array(
             "email",
             "facebook",
             "googleplus",
             "twitter",
-            "linkedin"
+            "linkedin",
+            "tumblr",
+            // "reddit",
+            // "pinterest",
             ),
+
+        "url" => "",
         "title" => "",
         "text" => "",
-        "source" => "",
-        "url" => "",
-        "tags" => "",
+        "source" => "", // linkedin
+        "tags" => "", // twitter
+        "media" => "", // pinterest, url img/video urlencoded
 
-        "theme" => "black",
+        "title_fields" => "headline|title", // if no title set use these fields to search
+        "text_fields" => "description|summary|body", // if no text set use these fields to search
+        "outer_wrapper_tag" => "ul",
+        "item_wrapper_tag" => "li",
+
+        "theme" => null,
         "namespace" => "mssb-",
         "char_limit" => 100,
         "char_limit_sypnosis" => " …",
@@ -131,12 +146,46 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
         "linkedin_params"       => "?mini=true&url={url}&title={title}&summary={text}&source={source}",
         "linkedin_icon"         => "<i>linkedin</i>",
 
+
+        /* Tumblr Params
+            url         : the page URL
+            name        : article title
+            description : article description
+         */
+        "tumblr_url"          => "http://www.tumblr.com/share/link",
+        "tumblr_params"       => "?url={url}&name={title}&description={text}",
+        "tumblr_icon"         => "<i>tumblr</i>",
+
+        /* Reddit Params
+            url         : the page URL
+            title       : article title
+         */
+        "reddit_url"          => "http://www.reddit.com/submit",
+        "reddit_params"       => "?url={url}&title={title}",
+        "reddit_icon"         => "<i>reddit</i>",
+
+        /* Pinterest Params
+            url         : the page URL
+            media       : Mandatory if you use this service, media full http url (image, video)
+            description : article description or title
+         */
+        "pinterest_url"          => "https://pinterest.com/pin/create/bookmarklet/",
+        "pinterest_params"       => "?media={media}&url={url}&description={text}",
+        "pinterest_icon"         => "<i>tumblr</i>",
+
     );
 
 
     public function __construct(){
 
-        foreach(self::$defaults as $key => $value){
+        $this->set("themeUrl", '');
+
+        if(isset($this->config->MarkupSocialShareButtonsServices) && is_array($this->config->MarkupSocialShareButtonsServices)) {
+            $this->addServices($this->config->MarkupSocialShareButtonsServices);
+            // $this->data = array_merge($this->data, $this->config->MarkupSocialShareButtons);
+        }
+
+        foreach($this->defaults as $key => $value){
             $this->set($key, $value);
         }
 
@@ -156,11 +205,6 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
             }
         }
 
-        if(isset($this->config->mssb_socialIcons) && is_array($this->config->mssb_socialIcons)) {
-            $this->data = array_merge($this->data, $this->config->mssb_socialIcons);
-        }
-
-        // print_r($this->data);
     }
 
     /**
@@ -189,6 +233,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
         // if a local custom theme file found inside /site/templates/ folder, load it
         $themeUrl = $this->config->urls->site . "/" . $name . "/";
+        $this->themeUrl = $themeUrl;
         $themePath = $this->config->paths->site . "/" . $name . "/";
         $themeFilename = $themePath . "theme.php";
         if(file_exists($themeFilename)) {
@@ -201,6 +246,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
         // so far no theme file so try from within module directory /theme/ folder
         $themeUrl = $this->config->urls->{$this->className} . self::THEMEPATH_LOCAL . "/" . $name . "/";
+        $this->themeUrl = $themeUrl;
         $themePath = $this->config->paths->{$this->className} . self::THEMEPATH_LOCAL . "/" . $name . "/";
         $themeFilename = $themePath . "theme.php";
         if(file_exists($themeFilename)) {
@@ -233,12 +279,12 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
         $data = array();
 
-        $data['{url}'] = $this->getPageUrl($this->options['url']);
-        $data['{url}'] = $this->encodeUrl($data['{url}']);
-        $data['{title}'] = $this->getPageTitle($this->options['title']);
-        $data['{text}'] = $this->getPageText($this->options['text']);
-        $data['{tags}'] = $this->options['tags'];
-        $data['{source}'] = $this->options['source'];
+        $data['{url}'] = $this->encodeUrl($this->getPageUrl($this->options['url']));
+        $data['{title}'] = $this->encodeUrl($this->getPageTitle($this->options['title']));
+        $data['{text}'] = $this->encodeUrl($this->getPageText($this->options['text']));
+        $data['{tags}'] = $this->encodeUrl($this->options['tags']);
+        $data['{source}'] = $this->encodeUrl($this->options['source']);
+        $data['{media}'] = $this->encodeUrl($this->options['media']);
 
         // $items = explode(",",str_replace(" ", "", $this->options["show"]));
         $items = $this->options["show"];
@@ -248,13 +294,15 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
             if($this->get($item . "_url") && $this->get($item . "_icon") && $this->get($item . "_params")) {
 
                 $sharerUrl = $this->get($item . "_url");
-                $icon = $this->get($item . "_icon");
+                $icon = str_replace("{themeUrl}", $this->themeUrl, $this->get($item . "_icon"));
                 $params = $this->get($item . "_params");
 
                 $popup = " {$this->namespace}popup";
                 $target = " target='_blank'";
 
                 if($item == "email") {
+                    $data["{text}"] = urldecode($data["{text}"]);
+                    $data["{title}"] = urldecode($data["{title}"]);
                     $params = str_replace(array_keys($data), array_values($data), $params);
                     $popup = "";
                     $target = "";
@@ -262,13 +310,13 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
                     $params = str_replace(array_keys($data), array_values($data), $params);
                 }
 
-                $out .= "<li class='{$this->namespace}item {$this->namespace}{$item}{$popup}'>
-                            <a$target href='{$sharerUrl}{$params}'>$icon</a>
-                        </li>";
+                $out .= "<$this->item_wrapper_tag class='{$this->namespace}item {$this->namespace}{$item}{$popup}'>
+                            <a$target title='$item' href='{$sharerUrl}{$params}'>$icon</a>
+                        </$this->item_wrapper_tag>";
             }
         }
 
-        return "<ul class='MarkupSocialShareButtons cf'>$out</ul>";
+        return "<$this->outer_wrapper_tag class='MarkupSocialShareButtons cf'>$out</$this->outer_wrapper_tag>";
 
     }
 
@@ -326,7 +374,9 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
     public function ___getPageTitle($title) {
 
         if(strlen(trim($title)) == 0){
-            $title = wire("page")->title;
+            if(wire("page")->get($this->title_fields)){
+                $title = wire("page")->get($this->title_fields);
+            }
         }
         return $this->truncateText($title, $this->char_limit, $this->char_limit_sypnosis);
 
@@ -344,8 +394,8 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
     public function ___getPageText($text) {
 
         if(!$text) {
-            if(wire("page")->get("leadtext|summary|body")) {
-                $text = wire("page")->get("leadtext|summary|body");
+            if(wire("page")->get($this->text_fields)) {
+                $text = wire("page")->get($this->text_fields);
             }
         }
         // Cut text! ouch!
@@ -392,11 +442,11 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
     public static function getModuleConfigInputfields(array $data){
 
-
-
         $inputfields = new InputfieldWrapper();
 
-        $data = array_merge( self::$defaults, $data );
+        $services = wire("modules")->MarkupSocialShareButtons->services;
+        $defaults = wire("modules")->MarkupSocialShareButtons->data;
+        $data = array_merge( $defaults, $data );
 
         $f = wire("modules")->InputfieldText;
         $f->attr("name", "namespace");
@@ -423,10 +473,41 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
         $f->description = "Added to end of cut text";
         $inputfields->add($f);
 
+        // $f = wire("modules")->InputfieldText;
+        // $f->attr("name", "outer_wrapper_tag");
+        // $f->attr("value", $data['outer_wrapper_tag']);
+        // $f->columnWidth = 50;
+        // $f->label = "Outer HTML Tag";
+        // $f->description = "Change markup tag for outer wrapper. Will recieve class='MarkupSocialShareButtons cf'.";
+        // $inputfields->add($f);
+
+        // $f = wire("modules")->InputfieldText;
+        // $f->attr("name", "item_wrapper_tag");
+        // $f->attr("value", $data['item_wrapper_tag']);
+        // $f->columnWidth = 50;
+        // $f->label = "Item HTML tag";
+        // $f->description = "Change markup tag for item wrapper. Will recieve class='" . $data['namespace']  ."item " . $data['namespace'] . "servicename " . $data['namespace'] ."popup'.";
+        // $inputfields->add($f);
+
+        $f = wire("modules")->InputfieldText;
+        $f->attr("name", "title_fields");
+        $f->attr("value", $data['title_fields']);
+        $f->columnWidth = 50;
+        $f->label = "Title fields to search";
+        $f->description = "Use these field to search for {title} if none is set";
+        $inputfields->add($f);
+
+        $f = wire("modules")->InputfieldText;
+        $f->attr("name", "text_fields");
+        $f->attr("value", $data['text_fields']);
+        $f->columnWidth = 50;
+        $f->label = "Text fields to search";
+        $f->description = "Use these field to search for the {text} if none is set";
+        $inputfields->add($f);
+
 
         $f = wire("modules")->InputfieldSelect;
         $f->attr("name", "theme");
-        // $f->columnWidth = 40;
         $themePath = wire("config")->paths->MarkupSocialShareButtons . self::THEMEPATH_LOCAL . "/";
         foreach(new DirectoryIterator($themePath) as $theme){
             if($theme->isDot()) continue;
@@ -440,12 +521,17 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
                     . " the service configurations will show a new textarea field to enter icons markup manually.";
         $inputfields->add($f);
 
+
         $f = wire("modules")->InputfieldMarkup;
         $f->label = "Theme Preview";
         $f->showIf = "theme!=0";
-        // $f->columnWidth = 60;
         $themeBaseUrl = wire("config")->urls->MarkupSocialShareButtons . self::THEMEPATH_LOCAL . "/";
-        $themeCSSUrl = $themeBaseUrl . $data['theme'] . "/" . "theme.css";
+        $themeCSSUrl = '';
+        $loadCSS = "false";
+        if($data['theme']) {
+            $themeCSSUrl = $themeBaseUrl . $data['theme'] . "/theme.css";
+            $loadCSS = "true";
+        }
         $adminAjaxUrl = wire('config')->urls->admin . "module/edit?name=MarkupSocialShareButtons";
         $previewRender = wire("modules")->MarkupSocialShareButtons->render();
         $f->value = <<<_MARKUP
@@ -456,35 +542,36 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
             $('head').append($('<link class="mssb-theme-cssfile" rel="stylesheet" href="$themeCSSUrl"/>'));
             $('[name=theme]').on('change',function(){
                 var mssb_theme_val = $(this).val();
-                $.ajax({
-                    url: '{$adminAjaxUrl}',
-                    type: 'post',
-                    data: {
-                        MarkupSocialShareButtons: 'loadtheme',
-                        theme: mssb_theme_val
-                    },
-                    success: function(data){
-                        $('.mssb-preview *').hide().html(data).fadeIn();
-                        $('.mssb-theme-cssfile').attr('href', '$themeBaseUrl' + mssb_theme_val + '/theme.css');
-                    }
-                });
-            })</script>
+                if(mssb_theme_val){
+                    $.ajax({
+                        url: '{$adminAjaxUrl}',
+                        type: 'post',
+                        data: {
+                            MarkupSocialShareButtons: 'loadtheme',
+                            theme: mssb_theme_val
+                        },
+                        success: function(data){
+                            $('.mssb-preview *').hide().html(data).fadeIn();
+                            $('.mssb-theme-cssfile').attr('href', '$themeBaseUrl' + mssb_theme_val + '/theme.css');
+                        }
+                    });
+                }
+                return true;
+            });</script>
 _MARKUP;
 
         $inputfields->add($f);
 
-
         $f = wire("modules")->InputfieldAsmSelect;
         $f->attr("name", "show");
-        foreach(self::$services as $service) $f->addOption($service, $service);
+        foreach($services as $service) $f->addOption($service, $service);
         $f->attr("value", $data['show']);
         $f->label = "What buttons to show (default)";
         $f->description = "Choose from the list and sort them as you wish. You can also set as option via API as an array of the social sevices. Will be output in the same order specified.";
         $inputfields->add($f);
 
 
-
-        foreach( self::$services as $service ) {
+        foreach( $services as $service ) {
 
             $f = wire("modules")->InputfieldText;
             $f->attr("name", $service . "_url");
@@ -502,12 +589,12 @@ _MARKUP;
             $f->attr("value", $data[$service . '_params']);
             $f->label = $service . " parameters";
             $f->description = "Can be any of the allowed $service params.";
-            $f->notes = "Use placeholders for the available values like: {url} {title} {text} {tags} {source}";
+            $f->notes = "Use placeholders for the available values like: {url} {title} {text} {tags} {source} {media}";
             $inputfields->add($f);
 
             $f = wire("modules")->InputfieldTextarea;
             $f->attr("name", $service . "_icon");
-            $f->showIf = "theme=0";
+            $f->showIf = "theme=0, show=" . $service;
             $f->attr("rows", 3);
             $f->attr("value", $data[$service . '_icon']);
             $f->label = $service . " icon markup";
@@ -522,4 +609,14 @@ _MARKUP;
     }
 
 
+    public function addServices(array $services = array()){
+        foreach($services as $key => $value){
+            $this->services[] = $key;
+            if(is_array($value)){
+                foreach($value as $k => $v) $this->set($k,$v);
+            }
+        }
+
+        return $this;
+    }
 }

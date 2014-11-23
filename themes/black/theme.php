@@ -3,10 +3,6 @@
 /**
  * Default Theme MarkupSocialShareButtons
  *
- * theme config var: "theme"
- * icon var: "[servicename]_icon"
- * local theme path var: $themeUrl
- *
  * This file is the default used by the module after a clean install.
  *
  * A theme can be choosen in the module config screen.
@@ -25,15 +21,18 @@
  *
  */
 
-// $themeUrl is available and set by the module
+// {themeUrl} or $themeUrl is available and set by the module
 // you can also get a custom path to and use API here with wire("config") or $this->config
 //
 // $themeUrl = wire("config")->urls->templates . "imgs/icons/";
 
 $socialIcons = array(
-    'email_icon'        => '<img src="' . $themeUrl . 'png/mail.png"/>',
-    'googleplus_icon'   => '<img src="' . $themeUrl . 'png/googleplus-square.png"/>',
-    'facebook_icon'     => '<img src="' . $themeUrl . 'png/facebook-square.png"/>',
-    'twitter_icon'      => '<img src="' . $themeUrl . 'png/twitter.png"/>',
-    'linkedin_icon'     => '<img src="' . $themeUrl . 'png/linkedin.png"/>',
+    'email_icon'        => '<img src="{themeUrl}png/mail.png"/>',
+    'googleplus_icon'   => '<img src="{themeUrl}png/googleplus-square.png"/>',
+    'facebook_icon'     => '<img src="{themeUrl}png/facebook-square.png"/>',
+    'twitter_icon'      => '<img src="{themeUrl}png/twitter.png"/>',
+    'linkedin_icon'     => '<img src="{themeUrl}png/linkedin.png"/>',
+    'reddit_icon'       => '<img src="{themeUrl}png/reddit.png"/>',
+    'tumblr_icon'       => '<img src="{themeUrl}png/tumblr.png"/>',
+    'pinterest_icon'    => '<img src="{themeUrl}png/pinterest.png"/>',
     );
