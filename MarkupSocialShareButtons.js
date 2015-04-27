@@ -1,8 +1,4 @@
 
 $(function(){
-
-
-    $('[name=theme]').on("change", function(){
-
-    });
+    // scripts inline
 }
