@@ -7,14 +7,15 @@
  *
  * A theme can be choosen in the module config screen.
  *
- * Alternatively from the API you can set a theme by using method ->setTheme(themename)
- * i.e. $modules->MarkupSocialShareButtons->setTheme("round")->render();
+ * Alternatively from the API you can set a theme by using method "theme" options
+ * i.e. $options = array("theme" => "themename");
  *
  * To create your own create a file with the content of this file somewhere in your site/templates/ folder
  * This would be a subfolder, and in there a file "theme.php".
  *
  * Now you can enter the path relative from "site/templates" in the module config
- *   $modules->MarkupSocialShareButtons->setTheme("mythemes/mytheme")->render();
+ * $options = array("theme" => "templates/socialbuttontheme/mytheme");
+ * $modules->MarkupSocialShareButtons->render($options);
  *
  * For the PNG icons themes I created using a set of PNG icons for free here
  * http://customizr.net/icons/?set=social-media

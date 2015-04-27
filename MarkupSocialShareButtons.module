@@ -47,8 +47,8 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
         return array(
             'title' => 'Social Share Buttons',
             'version' => 102,
-            'summary' => '',
-            'href' => '',
+            'summary' => 'Module to help create social share links. Comes with premade examples for styling and popup script. Create your own themes easily.',
+            'href' => 'https://processwire.com/talk/topic/8353-markupsocialsharebuttons/',
             'author' => 'Soma',
             'singular' => true,
             'autoload' => false,
@@ -301,8 +301,8 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
                 $target = " target='_blank'";
 
                 if($item == "email") {
-                    $data["{text}"] = urldecode($data["{text}"]);
-                    $data["{title}"] = urldecode($data["{title}"]);
+                    // $data["{text}"] = urldecode($data["{text}"]);
+                    // $data["{title}"] = urldecode($data["{title}"]);
                     $params = str_replace(array_keys($data), array_values($data), $params);
                     $popup = "";
                     $target = "";
@@ -406,11 +406,12 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
     /**
      * Look we can encode a URL!
      *
-     * @param  string $url URL string to encode
+     * @param  string $url URL param string to encode
      * @return string      encoded URL string
      */
-    public function ___encodeURL($url) {
-        return urlencode($url);
+    public function ___encodeURL($urlparam) {
+        $urlparam = htmlspecialchars_decode($urlparam, ENT_QUOTES);
+        return rawurlencode($urlparam);
     }
 
 
