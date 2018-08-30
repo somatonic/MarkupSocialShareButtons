@@ -46,7 +46,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
         return array(
             'title' => 'Social Share Buttons',
-            'version' => 103,
+            'version' => 104,
             'summary' => 'Module to help create social share links. Comes with premade examples for styling and popup script. Create your own themes easily.',
             'href' => 'https://processwire.com/talk/topic/8353-markupsocialsharebuttons/',
             'author' => 'Soma',
@@ -227,7 +227,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
         if(!$name) return $this;
 
         if(is_array($name) && count($name)){
-            $this->data = array_merge($this->data, $name);
+            $this->options = array_merge($this->options, $name);
             return $this;
         }
 
@@ -239,7 +239,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
         if(file_exists($themeFilename)) {
             include($themeFilename);
             if(isset($socialIcons) && is_array($socialIcons)) {
-                $this->data = array_merge($this->data, $socialIcons);
+                $this->options = array_merge($this->options, $socialIcons);
             }
             return $this;
         }
@@ -252,7 +252,7 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
         if(file_exists($themeFilename)) {
             include($themeFilename);
             if(isset($socialIcons) && is_array($socialIcons)) {
-                $this->data = array_merge($this->data, $socialIcons);
+                $this->options = array_merge($this->options, $socialIcons);
             }
             return $this;
         }
@@ -291,13 +291,13 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
 
         foreach($items as $item) {
 
-            if($this->get($item . "_url") && $this->get($item . "_icon") && $this->get($item . "_params")) {
+            if($this->options[$item . "_url"] && $this->options[$item . "_icon"] && $this->options[$item . "_params"]) {
 
-                $sharerUrl = $this->get($item . "_url");
-                $icon = str_replace("{themeUrl}", $this->themeUrl, $this->get($item . "_icon"));
-                $params = $this->get($item . "_params");
+                $sharerUrl = $this->options[$item . "_url"];
+                $icon = str_replace("{themeUrl}", $this->themeUrl, $this->options[$item . "_icon"]);
+                $params = $this->options[$item . "_params"];
 
-                $popup = " {$this->namespace}popup";
+                $popup = " {$this->options['namespace']}popup";
                 $target = " target='_blank'";
 
                 if($item == "email") {
@@ -310,13 +310,13 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
                     $params = str_replace(array_keys($data), array_values($data), $params);
                 }
 
-                $out .= "<$this->item_wrapper_tag class='{$this->namespace}item {$this->namespace}{$item}{$popup}'>
+                $out .= "<{$this->options['item_wrapper_tag']} class='{$this->options['namespace']}item {$this->options['namespace']}{$item}{$popup}'>
                             <a$target title='$item' href='{$sharerUrl}{$params}'>$icon</a>
-                        </$this->item_wrapper_tag>";
+                        </{$this->options['item_wrapper_tag']}>";
             }
         }
 
-        return "<$this->outer_wrapper_tag class='MarkupSocialShareButtons cf'>$out</$this->outer_wrapper_tag>";
+        return "<{$this->options['outer_wrapper_tag']} class='MarkupSocialShareButtons cf'>$out</{$this->options['outer_wrapper_tag']}>";
 
     }
 
@@ -374,11 +374,11 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
     public function ___getPageTitle($title) {
 
         if(strlen(trim($title)) == 0){
-            if(wire("page")->get($this->title_fields)){
-                $title = wire("page")->get($this->title_fields);
+            if(wire("page")->get($this->options['title_fields'])){
+                $title = wire("page")->get($this->options['title_fields']);
             }
         }
-        return $this->truncateText($title, $this->char_limit, $this->char_limit_sypnosis);
+        return $this->truncateText($title, $this->options['char_limit'], $this->options['char_limit_sypnosis']);
 
     }
 
@@ -394,12 +394,12 @@ class MarkupSocialShareButtons extends WireData implements Module, ConfigurableM
     public function ___getPageText($text) {
 
         if(!$text) {
-            if(wire("page")->get($this->text_fields)) {
-                $text = wire("page")->get($this->text_fields);
+            if(wire("page")->get($this->options['text_fields'])) {
+                $text = wire("page")->get($this->options['text_fields']);
             }
         }
         // Cut text! ouch!
-        return $this->truncateText($text, $this->char_limit, $this->char_limit_sypnosis);
+        return $this->truncateText($text, $this->options['char_limit'], $this->options['char_limit_sypnosis']);
 
     }
 
